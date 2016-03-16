@@ -50,6 +50,8 @@ RUN yum -y install epel-release && \
         procps-ng              \
         hostname               \
         java-1.7.0-openjdk     \
+        wget                   \
+        maven                  \
     && yum clean all
 
 
@@ -81,16 +83,18 @@ RUN set -ex \
 	done
 
 
-ADD download-guacd.sh /root/download-guacd.sh
+ADD https://raw.githubusercontent.com/glyptodon/guacd-docker/master/bin/download-guacd.sh /root/download-guacd.sh
 RUN chmod +x /root/download-guacd.sh
 # Download and install latest guacamole-server
 RUN cd /root;./download-guacd.sh "$GUAC_VERSION"
 
+RUN wget "http://sourceforge.net/projects/guacamole/files/current/source/guacamole-client-$GUAC_VERSION.tar.gz" -O /root/guacamole-server-$GUAC_VERSION.tar.gz
+RUN cd /root;tar -xzf guacamole-client-$GUAC_VERSION.tar.gz
+RUN cd /root/guacamole-client-guacamole-client-$GUAC_VERSION/;mvn package;
+RUN cp /root/guacamole-client-guacamole-client-$GUAC_VERSION/target/guacamole-$GUAC_VERSION.war /var/lib/tomcat/webapps/guacamole.war
 
 #TOMCAT PORT
 EXPOSE 8080
-#GUACD PORT
-#EXPOSE 4822
 
 ### TODO: Here there was CMD ["catalina.sh", "run"] - should we run it in this stage?
 ### we need to run all commands
