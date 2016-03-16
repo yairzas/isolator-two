@@ -4,27 +4,22 @@ MAINTAINER Yair Zaslavsky <yair.zaslavsky@gmail.com>
 MAINTAINER Anatoly Litovsky <anatoly.lit@gmail.com>
 
 # Environment variables
-ENV \
-    GUAC_VERSION=0.9.9 \
-    LC_ALL=en_US.UTF-8 \
+ENV GUAC_VERSION=0.9.9
+ENV C_ALL=en_US.UTF-8
 
 #Required setting for tomcat - due to guac server
-    TOMCAT_MAJOR 8 \
-    ENV TOMCAT_VERSION 8.0.32 \
-    ENV TOMCAT_TGZ_URL https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz \
+#    ENV TOMCAT_MAJOR=8 \
+#    ENV TOMCAT_VERSION=8.0.32 \
+#    ENV TOMCAT_TGZ_URL=https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz \
 
 #Required by guac client
-    GUAC_JDBC_VERSION=0.9.9 \
-    GUAC_LDAP_VERSION=0.9.9
+ENV GUAC_JDBC_VERSION=0.9.9
+ENV GUAC_LDAP_VERSION=0.9.9
 
 RUN yum -y update i
 
-
-
 #GUACD
 # Bring environment up-to-date, install guacamole-server build dependencies
-
-
 
 RUN yum -y install epel-release && \
     yum -y install             \
@@ -46,27 +41,26 @@ RUN yum -y install epel-release && \
         pulseaudio-libs-devel  \
         tar                    \
         terminus-fonts         \
-        uuid-devel              && \
-    yum clean all
+        uuid-devel             \
+        firefox                \
+        x11vnc                 \
+        xorg-x11-server-Xvfb   \
+        net-tools              \
+        which                  \
+        procps-ng              \
+        hostname               \
+        java-1.7.0-openjdk     \
+    && yum clean all
 
 
 #TODO: CMD [ "/usr/local/sbin/guacd", "-b", "0.0.0.0", "-f" ]
 
-COPY bin /opt/guacd/bin/
-
+RUN wget https://raw.githubusercontent.com/glyptodon/guacd-docker/master/bin/download-guacd.sh -O /opt/guacd/bin/download-guacd.sh
 # Download and install latest guacamole-server
 RUN /opt/guacd/bin/download-guacd.sh "$GUAC_VERSION"
 
-#Cagefox
-RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum install -y x11vnc xorg-x11-server-Xvfb git net-tools which python procps-ng hostname numpy python-websockify
-
-
 #GUAC-CLIENT
 #TOMCAT
-RUN yum install java-1.7.0-openjdk
-
-
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN mkdir -p "$CATALINA_HOME"
@@ -101,10 +95,15 @@ RUN set -x \
 
 
 
-### TODO: Here there was CMD ["catalina.sh", "run"] - should we run it in this stage?
 
 
 #TOMCAT PORT
 EXPOSE 8080
 #GUACD PORT
 EXPOSE 4822
+
+### TODO: Here there was CMD ["catalina.sh", "run"] - should we run it in this stage?
+### we need to run all commands
+ADD run.sh /root/run.sh
+
+CMD ["/root/run.sh"]
