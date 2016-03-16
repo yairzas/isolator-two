@@ -54,10 +54,14 @@ RUN yum -y install epel-release && \
 
 
 #TODO: CMD [ "/usr/local/sbin/guacd", "-b", "0.0.0.0", "-f" ]
+RUN yum install -y wget
 
-RUN wget https://raw.githubusercontent.com/glyptodon/guacd-docker/master/bin/download-guacd.sh -O /opt/guacd/bin/download-guacd.sh
+RUN mkdir -p /opt/guacd/bin/
+
+RUN wget https://raw.githubusercontent.com/glyptodon/guacd-docker/master/bin/download-guacd.sh -O /root/download-guacd.sh
+RUN chmod +x /root/download-guacd.sh
 # Download and install latest guacamole-server
-RUN /opt/guacd/bin/download-guacd.sh "$GUAC_VERSION"
+RUN cd /root;./download-guacd.sh "$GUAC_VERSION"
 
 #GUAC-CLIENT
 #TOMCAT
