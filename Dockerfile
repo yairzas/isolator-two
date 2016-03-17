@@ -88,9 +88,10 @@ RUN chmod +x /root/download-guacd.sh
 # Download and install latest guacamole-server
 RUN cd /root;./download-guacd.sh "$GUAC_VERSION"
 
-RUN cd /root;curl -L "http://sourceforge.net/projects/guacamole/files/current/source/guacamole-client-$GUAC_VERSION.tar.gz" | tar -xz -C "/tmp" \
-    cd "guacamole-client-$GUAC_VERSION/";mvn package;
-RUN cp "guacamole/target/guacamole-$GUAC_VERSION.war" /var/lib/tomcat/webapps/guacamole.war
+RUN cd /root;curl -L "http://sourceforge.net/projects/guacamole/files/current/source/guacamole-client-$GUAC_VERSION.tar.gz" | tar -xz -C "/tmp"; \
+    cd "/tmp/guacamole-client-$GUAC_VERSION/";mvn package; \
+    cp "guacamole/target/guacamole-$GUAC_VERSION.war" /var/lib/tomcat/webapps/guacamole.war \
+    cd  /; rm -rf "guacamole-client-$GUAC_VERSION.tar.gz"
 
 #TOMCAT PORT
 EXPOSE 8080
