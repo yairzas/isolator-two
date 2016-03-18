@@ -1,4 +1,4 @@
-# Start from CentOS base image
+#### Start from CentOS base image
 FROM centos:centos7
 MAINTAINER Yair Zaslavsky <yair.zaslavsky@gmail.com>
 MAINTAINER Anatoly Litovsky <anatoly.lit@gmail.com>
