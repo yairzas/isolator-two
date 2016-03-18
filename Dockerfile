@@ -64,23 +64,23 @@ ENV PATH $CATALINA_HOME/bin:$PATH
 RUN mkdir -p "$CATALINA_HOME"
 WORKDIR $CATALINA_HOME
 
-RUN set -ex \
-	&& for key in \
-		05AB33110949707C93A279E3D3EFE6B686867BA6 \
-		07E48665A34DCAFAE522E5E6266191C37C037D42 \
-		47309207D818FFD8DCD3F83F1931D684307A10A5 \
-		541FBE7D8F78B25E055DDEE13C370389288584E7 \
-		61B832AC2F1C5A90F0F9B00A1C506407564C17A3 \
-		79F7026C690BAA50B92CD8B66A3AD3F4F22C4FED \
-		9BA44C2621385CB966EBA586F72C284D731FABEE \
-		A27677289986DB50844682F8ACB77FC2E86E29AC \
-		A9C5DF4D22E99998D9875A5110C01C5A2F6059E7 \
-		DCFD35E0BF8CA7344752DE8B6FB21E8933C60243 \
-		F3A04C595DB5B6A5F1ECA43E3B7BBB100D811BBE \
-		F7DA48BB64BCB84ECBA7EE6935CD23C10D498E23 \
-	; do \
-		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	done
+#RUN set -ex \
+#	&& for key in \
+#		05AB33110949707C93A279E3D3EFE6B686867BA6 \
+#		07E48665A34DCAFAE522E5E6266191C37C037D42 \
+#		47309207D818FFD8DCD3F83F1931D684307A10A5 \
+#		541FBE7D8F78B25E055DDEE13C370389288584E7 \
+#		61B832AC2F1C5A90F0F9B00A1C506407564C17A3 \
+#		79F7026C690BAA50B92CD8B66A3AD3F4F22C4FED \
+#		9BA44C2621385CB966EBA586F72C284D731FABEE \
+#		A27677289986DB50844682F8ACB77FC2E86E29AC \
+#		A9C5DF4D22E99998D9875A5110C01C5A2F6059E7 \
+#		DCFD35E0BF8CA7344752DE8B6FB21E8933C60243 \
+#		F3A04C595DB5B6A5F1ECA43E3B7BBB100D811BBE \
+#		F7DA48BB64BCB84ECBA7EE6935CD23C10D498E23 \
+#	; do \
+#		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+#	done
 
 
 ADD https://raw.githubusercontent.com/glyptodon/guacd-docker/master/bin/download-guacd.sh /root/download-guacd.sh
@@ -98,8 +98,34 @@ EXPOSE 8080
 
 ### TODO: Here there was CMD ["catalina.sh", "run"] - should we run it in this stage?
 ### we need to run all commands
+
 RUN dbus-uuidgen > /var/lib/dbus/machine-id
 ADD run.sh /root/run.sh
+
+#CONFIGURATION 
+
+RUN mkdir -p /root/.gacacmole
+ENV GUACAMOLE_HOME=/root/.guacamole
+
+RUN mkdir -p ${GUACAMOLE_HOME}/extensions
+RUN mkdir -p ${GUACAMOLE_HOME}/lib
+RUN echo "available-languages: en, de" > ${GUACAMOLE_HOME}/guacamole.properties
+
+RUN echo "<configuration>" > ${GUACAMOLE_HOME}/logback.xml
+RUN echo " <appender name=\"GUAC-DEBUG\" class=\"ch.qos.logback.core.ConsoleAppender\"> " >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "        <encoder>" >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>" >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "        </encoder>" >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "    </appender>" >> ${GUACAMOLE_HOME}/logback.xml
+
+RUN echo "    <root level=\"debug\">" >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "        <appender-ref ref="GUAC-DEBUG"/>" >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "    </root>" >> ${GUACAMOLE_HOME}/logback.xml
+RUN echo "</configuration>" >> ${GUACAMOLE_HOME}/logback.xml
+
+
+
+
 RUN chmod +x ~/run.sh
 
 CMD ["/root/run.sh"]
