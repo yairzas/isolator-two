@@ -123,6 +123,20 @@ RUN echo "        <appender-ref ref="GUAC-DEBUG"/>" >> ${GUACAMOLE_HOME}/logback
 RUN echo "    </root>" >> ${GUACAMOLE_HOME}/logback.xml
 RUN echo "</configuration>" >> ${GUACAMOLE_HOME}/logback.xml
 
+## USER MAPPING
+
+RUN echo "<user-mapping>" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "   <authorize username=\"vnc\" password=\"nopassword\">" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "      <protocol>vnc</protocol>" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "      <param name="hostname">localhost</param>" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "      <param name="port">5900</param>" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "      <param name="password">VNCPASS</param>" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "   </authorize>" > ${GUACAMOLE_HOME}/user-mapping.xml
+RUN echo "</user-mapping>" > ${GUACAMOLE_HOME}/user-mapping.xml
+
+
+
+
 
 
 
